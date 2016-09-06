@@ -1,0 +1,11 @@
+{
+  "name": "redux-data-store",
+  "version": "1.0.0",
+  "description": "A CRUD Data Store for redux inspired by Ember Data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
