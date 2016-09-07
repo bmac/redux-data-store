@@ -38,7 +38,7 @@ describe('Integration tests', function() {
       }]
     }))
 
-    var record = getRecord(store.getState(), 'post', 1, ['author'])
+    var record = getRecord(store.getState(), 'post', 1, ['author']);
     assert.deepEqual(record, {
       id: "1",
       type: 'post',
@@ -50,6 +50,6 @@ describe('Integration tests', function() {
         "lastName": "Gebhardt",
         "twitter": "dgeb"
       }
-    })
+    });
   });
 });
