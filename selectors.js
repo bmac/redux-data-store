@@ -4,16 +4,24 @@ function coerceId(id) {
   return `${id}`
 }
 
-export const getAttributes = function(state, type, id) {
+const getAttributes = function(state, type, id) {
   id = coerceId(id)
-  return Object.assign({
-    id: id,
-    type: type,
-  }, state[type][id].attributes)
+  return Object.assign(
+    {
+      id: id,
+      type: type,
+    },
+    state.records[type][id].attributes,
+    state.records[type][id].changedAttributes
+  )
 }
 
-export const getRelationship = function(state, type, id, relationshipName) {
-  var relData = state[type][id].relationships[relationshipName].data
+const getRelationship = function(state, type, id, relationshipName) {
+  var relationship = state.records[type][id].relationships[relationshipName]
+  if (!relationship) {
+    return undefined;
+  }
+  var relData = relationship.data
   return getAttributes(state, relData.type, relData.id)
 }
 
@@ -27,21 +35,15 @@ export const getRecord = function(state, type, id, include) {
   );
 }
 
-export const getRecordInfo = function(state, type, id) {
-  
-}
-
-
-export const hasRecordForId = function(state, type, id) {
-
-}
-
-export const getQuery = function(state, label) {
-
+export const getQuery = function(state, label, include) {
+  return state.queries[label].map(function({type, id}) {
+    return getRecord(state, type, id, include);
+  });
 }
 
 // peekAll
-export const getAll = function(state, type) {
-
-}
-
+export const getAll = function(state, type, include) {
+  return Object.keys(state.records[type]).map(function(id) {
+    return getRecord(state, type, id, include);
+  });
+};

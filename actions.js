@@ -5,3 +5,11 @@ export const push = function(jsonDocument) {
     jsonDocument: jsonDocument
   }
 }
+
+export const updateRecord = function(record, update) {
+  return {
+    type: 'UPDATE',
+    record: record,
+    update: update,
+  }
+}
