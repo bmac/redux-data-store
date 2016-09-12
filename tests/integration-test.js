@@ -2,9 +2,7 @@ import { createStore } from 'redux';
 import { assert } from 'chai';
 import reducer from '../reducer';
 import { getRecord, getAll, getQuery } from '../selectors';
-import { push, updateRecord } from '../actions';
-
-
+import { push, pushQuery, updateRecord } from '../actions';
 
 
 describe('Integration tests', function() {
@@ -118,10 +116,7 @@ describe('Integration tests', function() {
 
   it('should get all the records in a query', function() {
     var store = createStore(reducer)
-    store.dispatch(push({
-      rdsMeta: {
-        queryLabel: 'my-query'
-      },
+    store.dispatch(pushQuery('my-query', {
       data: [{
         "type": "post",
         "id": "1",
@@ -176,8 +171,6 @@ describe('Integration tests', function() {
       author: undefined
     }]);
   });
-
-
 
   it('should update a record', function() {
     var store = createStore(reducer)

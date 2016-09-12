@@ -41,7 +41,6 @@ export const getQuery = function(state, label, include) {
   });
 }
 
-// peekAll
 export const getAll = function(state, type, include) {
   return Object.keys(state.records[type]).map(function(id) {
     return getRecord(state, type, id, include);
