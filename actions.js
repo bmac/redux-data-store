@@ -21,3 +21,12 @@ export const updateRecord = function(record, update) {
     update: update,
   }
 }
+
+
+// export const findRecord = function(query, adapter) {3
+//   return function(dispatch) {
+//     return adapter.findRecord(query).then(function(jsonDocument) {
+//       return dispatch(push(jsonDocument))
+//     });
+//   }
+// }

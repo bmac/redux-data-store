@@ -1,5 +1,7 @@
 import makeArray from './make-array'
 
+var selectorMap = new WeakMap();
+
 function coerceId(id) {
   return `${id}`
 }
@@ -25,13 +27,27 @@ const getRelationship = function(state, type, id, relationshipName) {
   return getAttributes(state, relData.type, relData.id)
 }
 
+const getRecordFromCache = function(state, type, id, include) {
+  var cache = selectorMap.get(state.records) || {}
+  var cacheKey = [type, id].concat(include).join('-')
+  var record = cache[cacheKey] = cache[cacheKey] || computeRecord(state, type, id, include)
+  selectorMap.set(state.records, cache)
+  return record
+}
+
+//
 export const getRecord = function(state, type, id, include) {
-  return Object.assign(
+  include = makeArray(include).sort()
+  return getRecordFromCache(state, type, id, include)
+}
+
+const computeRecord = function(state, type, id, include) {
+  return Object.freeze(Object.assign(
     getAttributes(state, type, id),
     makeArray(include).reduce(function(relationships, name) {
       relationships[name] = getRelationship(state, type, id, name)
       return relationships
-    }, {})
+    }, {}))
   );
 }
 

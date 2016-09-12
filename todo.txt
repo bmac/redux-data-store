@@ -1,0 +1,19 @@
+implement finders
+
+make updateRecord update both sides of a relationship
+need some way to define a model or schema for reducer
+{
+  post: Model.define({
+    author: belongsTo('person', { inverse: 'posts' })
+  }),
+  person: Model.define({
+    posts: hasMany('post', { inverse: 'author' })
+  })
+}
+
+implement rollback
+
+implement nested includes
+
+implement accessors
+

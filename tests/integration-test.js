@@ -191,4 +191,140 @@ describe('Integration tests', function() {
     var updatedRecord = getRecord(store.getState(), 'post', 1);
     assert.equal(updatedRecord.title, 'New Title')
   });
+
+  it('should return the same object from getRecord if the state doesn\'t change', function() {
+    var store = createStore(reducer)
+    store.dispatch(push({
+      data: {
+        "type": "post",
+        "id": "1",
+        "attributes": {
+          "title": "JSON API paints my bikeshed!"
+        },
+        "relationships": {
+          "author": {
+            "data": { "type": "person", "id": "9" }
+          }
+        }
+      },
+      "included": [{
+        "type": "person",
+        "id": "9",
+        "attributes": {
+          "firstName": "Dan",
+          "lastName": "Gebhardt",
+          "twitter": "dgeb"
+        }
+      }]
+    }))
+
+    var record = getRecord(store.getState(), 'post', 1, ['author']);
+    assert.equal(
+      getRecord(store.getState(), 'post', 1, ['author']),
+      getRecord(store.getState(), 'post', 1, ['author'])
+    );
+  });
+
+  it('should return different objects if the includes param changes', function() {
+    var store = createStore(reducer)
+    store.dispatch(push({
+      data: {
+        "type": "post",
+        "id": "1",
+        "attributes": {
+          "title": "JSON API paints my bikeshed!"
+        },
+        "relationships": {
+          "author": {
+            "data": { "type": "person", "id": "9" }
+          }
+        }
+      },
+      "included": [{
+        "type": "person",
+        "id": "9",
+        "attributes": {
+          "firstName": "Dan",
+          "lastName": "Gebhardt",
+          "twitter": "dgeb"
+        }
+      }]
+    }))
+
+    var record = getRecord(store.getState(), 'post', 1, ['author']);
+    assert.notEqual(
+      getRecord(store.getState(), 'post', 1, ['author']),
+      getRecord(store.getState(), 'post', 1, [])
+    );
+  });
+
+  it('should return different objects if state change', function() {
+    var store = createStore(reducer)
+    store.dispatch(push({
+      data: {
+        "type": "post",
+        "id": "1",
+        "attributes": {
+          "title": "JSON API paints my bikeshed!"
+        },
+        "relationships": {
+          "author": {
+            "data": { "type": "person", "id": "9" }
+          }
+        }
+      },
+      "included": [{
+        "type": "person",
+        "id": "9",
+        "attributes": {
+          "firstName": "Dan",
+          "lastName": "Gebhardt",
+          "twitter": "dgeb"
+        }
+      }]
+    }))
+    var firstRecord = getRecord(store.getState(), 'post', 1, ['author']);
+    // Update the store state
+    store.dispatch(push({
+      data: []
+    }))
+
+    assert.notEqual(
+      firstRecord,
+      getRecord(store.getState(), 'post', 1, ['author'])
+    );
+  });
+
+  it('should return a frozen object', function() {
+    var store = createStore(reducer)
+    store.dispatch(push({
+      data: {
+        "type": "post",
+        "id": "1",
+        "attributes": {
+          "title": "JSON API paints my bikeshed!"
+        },
+        "relationships": {
+          "author": {
+            "data": { "type": "person", "id": "9" }
+          }
+        }
+      },
+      "included": [{
+        "type": "person",
+        "id": "9",
+        "attributes": {
+          "firstName": "Dan",
+          "lastName": "Gebhardt",
+          "twitter": "dgeb"
+        }
+      }]
+    }))
+    var record = getRecord(store.getState(), 'post', 1, ['author']);
+
+    assert.equal(
+      Object.isFrozen(record),
+      true
+    );
+  });
 });
