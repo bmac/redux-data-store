@@ -51,7 +51,6 @@ const computeRecord = function(state, type, id, include) {
   return Object.freeze(Object.assign(
     getAttributes(state, type, id),
     makeArray(include)
-      .filter(name => name !== '')
       .reduce(function(relationships, name) {
         const includesParts = name.split('.');
         const relationshipName = includesParts[0];
