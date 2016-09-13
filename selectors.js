@@ -1,4 +1,5 @@
-import makeArray from './make-array'
+import makeArray from './make-array';
+import merge from 'lodash.merge';
 
 var selectorMap = new WeakMap();
 
@@ -18,13 +19,18 @@ const getAttributes = function(state, type, id) {
   )
 }
 
-const getRelationship = function(state, type, id, relationshipName) {
-  var relationship = state.records[type][id].relationships[relationshipName]
+const getRelationship = function(state, type, id, relationshipName, includes) {
+  const relationship = state.records[type][id].relationships[relationshipName]
   if (!relationship) {
     return undefined;
   }
-  var relData = relationship.data
-  return getAttributes(state, relData.type, relData.id)
+  const relData = relationship.data
+  if (Array.isArray(relData)) {
+    return relData.map(function({ type, id }) {
+      return getRecord(state, type, id, includes)
+    })
+  }
+  return getRecord(state, relData.type, relData.id, includes)
 }
 
 const getRecordFromCache = function(state, type, id, include) {
@@ -44,11 +50,15 @@ export const getRecord = function(state, type, id, include) {
 const computeRecord = function(state, type, id, include) {
   return Object.freeze(Object.assign(
     getAttributes(state, type, id),
-    makeArray(include).reduce(function(relationships, name) {
-      relationships[name] = getRelationship(state, type, id, name)
-      return relationships
-    }, {}))
-  );
+    makeArray(include)
+      .filter(name => name !== '')
+      .reduce(function(relationships, name) {
+        const includesParts = name.split('.');
+        const relationshipName = includesParts[0];
+        const includes = includesParts.slice(1).join('.');
+        relationships[relationshipName] = getRelationship(state, type, id, relationshipName, includes);
+        return relationships
+      }, {})));
 }
 
 export const getQuery = function(state, label, include) {
