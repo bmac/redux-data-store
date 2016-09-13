@@ -56,7 +56,11 @@ const computeRecord = function(state, type, id, include) {
         const includesParts = name.split('.');
         const relationshipName = includesParts[0];
         const includes = includesParts.slice(1).join('.');
-        relationships[relationshipName] = getRelationship(state, type, id, relationshipName, includes);
+        let relationship = getRelationship(state, type, id, relationshipName, includes);
+        if (relationships[relationshipName]) {
+          relationship = Object.assign({}, relationships[relationshipName], relationship)
+        }
+        relationships[relationshipName] = relationship
         return relationships
       }, {})));
 }

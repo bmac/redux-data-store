@@ -102,6 +102,71 @@ describe('Integration tests', function() {
     });
   });
 
+  it('should select nested relationships with include where the same relationships is included with 2 nested relationships', function() {
+    var store = createStore(reducer)
+    store.dispatch(push({
+      data: {
+        "type": "post",
+        "id": "1",
+        "attributes": {
+          "title": "JSON API paints my bikeshed!"
+        },
+        "relationships": {
+          "author": {
+            "data": { "type": "person", "id": "9" }
+          }
+        }
+      },
+      "included": [{
+        "type": "person",
+        "id": "9",
+        "attributes": {
+          "firstName": "Dan",
+          "lastName": "Gebhardt",
+          "twitter": "dgeb"
+        },
+        "relationships": {
+          "posts": {
+            "data": [{ "type": "post", "id": "1" }]
+          },
+          profile: {
+            "data": { "type": "profile", "id": "1" }
+          }
+        }
+      }, {
+        type: 'profile',
+        id: '1',
+        attributes: {
+          avatar: 'my-gravatar-url'
+        }
+      }]
+    }))
+
+    var record = getRecord(store.getState(), 'post', 1, ['author.posts', 'author.profile']);
+    assert.deepEqual(record, {
+      id: "1",
+      type: 'post',
+      title: "JSON API paints my bikeshed!",
+      author: {
+        "type": "person",
+        "id": "9",
+        "firstName": "Dan",
+        "lastName": "Gebhardt",
+        "twitter": "dgeb",
+        posts: [{
+          id: "1",
+          type: 'post',
+          title: "JSON API paints my bikeshed!",
+        }],
+        profile: {
+          id: '1',
+          type: 'profile',
+          avatar: 'my-gravatar-url',
+        }
+      }
+    });
+  });
+
   it('should get all the records for a type', function() {
     var store = createStore(reducer)
     store.dispatch(push({
