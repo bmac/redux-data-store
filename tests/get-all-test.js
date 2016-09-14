@@ -1,13 +1,13 @@
 import { createStore } from 'redux';
 import { assert } from 'chai';
-import reducer from '../reducer';
+import createReducer from '../reducer';
 import { getAll } from '../selectors';
 import { push, pushQuery, updateRecord } from '../actions';
 
 
 describe('Selector: getAll', function() {
   it('should get all the records for a type', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: [{
         "type": "post",

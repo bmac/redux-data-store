@@ -1,12 +1,12 @@
 import { createStore } from 'redux';
 import { assert } from 'chai';
-import reducer from '../reducer';
+import createReducer from '../reducer';
 import { getRecord } from '../selectors';
 import { push } from '../actions';
 
 describe('ActionCreators: push', function() {
   it('should push JSONAPI data into the store', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",

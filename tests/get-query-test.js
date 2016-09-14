@@ -1,13 +1,13 @@
 import { createStore } from 'redux';
 import { assert } from 'chai';
-import reducer from '../reducer';
+import createReducer from '../reducer';
 import { getQuery } from '../selectors';
 import { push, pushQuery, updateRecord } from '../actions';
 
 
 describe('Selector: getQuery', function() {
   it('should get all the records in a query', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(pushQuery('my-query', {
       data: [{
         "type": "post",

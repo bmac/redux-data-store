@@ -1,12 +1,20 @@
 import { createStore } from 'redux';
 import { assert } from 'chai';
-import reducer from '../reducer';
+import createReducer from '../reducer';
 import { getRecord, getAll, getQuery } from '../selectors';
 import { push, pushQuery, updateRecord } from '../actions';
 
+var models = {
+  post: {
+    author: {
+      relationshipType: 'belongs-to'
+    }
+  }
+}
+
 describe('ActionCreators: updateRecord', function() {
   it('should update an attribute on a record', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: [{
         "type": "post",
@@ -26,7 +34,7 @@ describe('ActionCreators: updateRecord', function() {
   });
 
   it('should update a relationship on a record', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer(models))
     store.dispatch(push({
       data: {
         "type": "post",

@@ -31,12 +31,14 @@ function attributeKeys(record) {
 }
 
 function relationshipKeys(model, update) {
-  return ['author'].filter(function(key) {
+  if (!model) {
+    return []
+  }
+  return Object.keys(model).filter(function(key) {
+    return model[key].relationshipType;
+  }).filter(function(key) {
     return key in update
   });
-  // return Object.keys(model).filter(function(key) {
-  //   return model[key].relationshipType;
-  // });
 }
 
 function getId(relationship) {
@@ -79,7 +81,7 @@ function updateRelationships(update, model, originalRecord) {
   }, originalRecord)
 }
 
-function updateRecord(state, record, update) {
+function updateRecord(state, record, update, getModel) {
   var originalRecord = getPrivateRecordState(state, record.type, record.id)
   const updatedAttributes = attributeKeys(update).reduce(function(recordState, key) {
     // No change for this attribute do nothing
@@ -99,32 +101,39 @@ function updateRecord(state, record, update) {
       {
         [key]: update[key],
       })
-        
+
     return Object.assign({}, recordState, {
       changedAttributes: changedAttributes
     });
   }, originalRecord)
 
-  return updateRelationships(update, {}, updatedAttributes);
+  return updateRelationships(update, getModel(originalRecord.type), updatedAttributes);
 }
 
-export default (state = {}, action) => {
-  switch (action.type) {
-    case 'PUSH':
-      return Object.assign(
-        {}, state, normalizeDocument(action.jsonDocument)
-      );
-    case 'UPDATE':
-      return merge({}, state, {
-        [action.record.type]: {
-          [action.record.id]: updateRecord(state, action.record, action.update)
-        }
-      });
-    default: 
-      return state
+
+export default (models) => {
+
+  let getModel = function(type) {
+    return models[type]
+  }
+
+  return (state = {}, action) => {
+    switch (action.type) {
+      case 'PUSH':
+        return Object.assign(
+          {}, state, normalizeDocument(action.jsonDocument)
+        );
+      case 'UPDATE':
+        return merge({}, state, {
+          [action.record.type]: {
+            [action.record.id]: updateRecord(state, action.record, action.update, getModel)
+          }
+        });
+      default:
+        return state
+    }
   }
 }
-
 
 const getPrivateRecordState = function(state, type, id) {
   return state[type][id]

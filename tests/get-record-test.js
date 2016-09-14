@@ -1,13 +1,13 @@
 import { createStore } from 'redux';
 import { assert } from 'chai';
-import reducer from '../reducer';
+import createReducer from '../reducer';
 import { getRecord, getAll, getQuery } from '../selectors';
 import { push, pushQuery, updateRecord } from '../actions';
 
 
 describe('Selector: getRecord', function() {
   it('should get a record with a relationship', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",
@@ -41,7 +41,7 @@ describe('Selector: getRecord', function() {
   });
   
   it('should get a record with a relationship', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",
@@ -82,7 +82,7 @@ describe('Selector: getRecord', function() {
   });
 
   it('should select nested relationships with include', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",
@@ -133,7 +133,7 @@ describe('Selector: getRecord', function() {
   });
 
   it('should select nested relationships with include where the same relationships is included with 2 nested relationships', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",
@@ -198,7 +198,7 @@ describe('Selector: getRecord', function() {
   });
 
   it('should return the same object from getRecord if the state doesn\'t change', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",
@@ -231,7 +231,7 @@ describe('Selector: getRecord', function() {
   });
 
   it('should return different objects if the includes param changes', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",
@@ -264,7 +264,7 @@ describe('Selector: getRecord', function() {
   });
 
   it('should return different objects if state change', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",
@@ -301,7 +301,7 @@ describe('Selector: getRecord', function() {
   });
 
   it('should return a frozen object', function() {
-    var store = createStore(reducer)
+    var store = createStore(createReducer({}))
     store.dispatch(push({
       data: {
         "type": "post",
