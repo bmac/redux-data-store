@@ -13,7 +13,7 @@ function makeArray(maybeArray) {
 
 function addRecordToState(state, record) {
   state[record.type] = state[record.type] || {}
-  state[record.type][record.id] = Object.assign({attributes: {}, relationships: {}, changedAttributes: {}}, record)
+  state[record.type][record.id] = Object.assign({attributes: {}, relationships: {}, changedAttributes: {}, changedRelationships: {}}, record)
   // todo add state to the record
   return state
 }
@@ -30,9 +30,58 @@ function attributeKeys(record) {
   })
 }
 
+function relationshipKeys(model, update) {
+  return ['author'].filter(function(key) {
+    return key in update
+  });
+  // return Object.keys(model).filter(function(key) {
+  //   return model[key].relationshipType;
+  // });
+}
+
+function getId(relationship) {
+  return relationship && relationship.data && relationship.data.id
+}
+
+function getType(relationship) {
+  return relationship && relationship.data && relationship.data.type
+}
+
+function relationshipIsSame(original, update, key) {
+  return getId(original[key]) === update[key].id &&
+    getType(original[key]) === update[key].type;
+}
+
+function updateRelationships(update, model, originalRecord) {
+  return relationshipKeys(model, update).reduce(function(recordState, key) {
+    if (relationshipIsSame(recordState.changedRelationships, update, key)) {
+      return recordState;
+    }
+    if (relationshipIsSame(recordState.relationships, update, key)) {
+      if (key in recordState.changedRelationships) {
+        delete recordState.changedRelationships[key]
+      }
+      return recordState;
+    }
+    var changedRelationships = Object.assign(
+      {}, recordState.changedRelationships,
+      {
+        [key]: {
+          data: {
+            type: update[key].type,
+            id: update[key].id,
+          }
+        }
+      })
+    return Object.assign({}, recordState, {
+      changedRelationships: changedRelationships
+    });
+  }, originalRecord)
+}
+
 function updateRecord(state, record, update) {
   var originalRecord = getPrivateRecordState(state, record.type, record.id)
-  return attributeKeys(update).reduce(function(recordState, key) {
+  const updatedAttributes = attributeKeys(update).reduce(function(recordState, key) {
     // No change for this attribute do nothing
     if (recordState.changedAttributes[key] === update[key]) {
       return recordState;
@@ -55,6 +104,8 @@ function updateRecord(state, record, update) {
       changedAttributes: changedAttributes
     });
   }, originalRecord)
+
+  return updateRelationships(update, {}, updatedAttributes);
 }
 
 export default (state = {}, action) => {

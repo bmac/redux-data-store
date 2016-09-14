@@ -20,7 +20,10 @@ const getAttributes = function(state, type, id) {
 }
 
 const getRelationship = function(state, type, id, relationshipName, includes) {
-  const relationship = state.records[type][id].relationships[relationshipName]
+  let relationship = state.records[type][id].changedRelationships[relationshipName]
+  if (!relationship) {
+    relationship = state.records[type][id].relationships[relationshipName]
+  }
   if (!relationship) {
     return undefined;
   }
