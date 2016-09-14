@@ -1,4 +1,8 @@
 implement finders
+implement save
+
+convince me why infligt is needed
+convince me why I should use a state machine
 
 make updateRecord update both sides of a relationship
 need some way to define a model or schema for reducer
@@ -13,7 +17,7 @@ need some way to define a model or schema for reducer
 
 implement rollback
 
-implement nested includes
-
 implement accessors
+
+implement createRecord
 

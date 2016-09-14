@@ -1,19 +1,15 @@
 import { createStore } from 'redux';
 import { assert } from 'chai';
 import reducer from '../reducer';
-import { getRecord, getAll, getQuery } from '../selectors';
+import { getAll } from '../selectors';
 import { push, pushQuery, updateRecord } from '../actions';
 
 
-describe('Integration tests', function() {
-  it('should create a store', function() {
-    var store = createStore(reducer)
-  });
-
-  it('should push JSONAPI data into the store', function() {
+describe('Selector: getAll', function() {
+  it('should get all the records for a type', function() {
     var store = createStore(reducer)
     store.dispatch(push({
-      data: {
+      data: [{
         "type": "post",
         "id": "1",
         "attributes": {
@@ -24,7 +20,13 @@ describe('Integration tests', function() {
             "data": { "type": "person", "id": "9" }
           }
         }
-      },
+      }, {
+        "type": "post",
+        "id": "2",
+        "attributes": {
+          "title": "Rails is omakase"
+        },
+      }],
       "included": [{
         "type": "person",
         "id": "9",
@@ -33,11 +35,17 @@ describe('Integration tests', function() {
           "lastName": "Gebhardt",
           "twitter": "dgeb"
         }
+      }, {
+        "type": "post",
+        "id": "3",
+        "attributes": {
+          "title": "On Interface Complexity"
+        }
       }]
     }))
 
-    var record = getRecord(store.getState(), 'post', 1, ['author']);
-    assert.deepEqual(record, {
+    var allPostRecords = getAll(store.getState(), 'post', ['author']);
+    assert.deepEqual(allPostRecords, [{
       id: "1",
       type: 'post',
       title: "JSON API paints my bikeshed!",
@@ -48,26 +56,16 @@ describe('Integration tests', function() {
         "lastName": "Gebhardt",
         "twitter": "dgeb"
       }
-    });
-  });
-
-  it('should update a record', function() {
-    var store = createStore(reducer)
-    store.dispatch(push({
-      data: [{
-        "type": "post",
-        "id": "1",
-        "attributes": {
-          "title": "JSON API paints my bikeshed!"
-        }
-      }],
-    }))
-
-    var record = getRecord(store.getState(), 'post', 1);
-
-    store.dispatch(updateRecord(record, { title: 'New Title'}))
-
-    var updatedRecord = getRecord(store.getState(), 'post', 1);
-    assert.equal(updatedRecord.title, 'New Title')
+    }, {
+      "type": "post",
+      "id": "2",
+      "title": "Rails is omakase",
+      author: undefined
+    }, {
+      "type": "post",
+      "id": "3",
+      "title": "On Interface Complexity",
+      author: undefined
+    }]);
   });
 });
