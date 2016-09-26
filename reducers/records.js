@@ -14,7 +14,6 @@ function makeArray(maybeArray) {
 function addRecordToState(state, record) {
   state[record.type] = state[record.type] || {}
   state[record.type][record.id] = Object.assign({attributes: {}, relationships: {}, changedAttributes: {}, changedRelationships: {}}, record)
-  // todo add state to the record
   return state
 }
 
@@ -54,7 +53,40 @@ function relationshipIsSame(original, update, key) {
     getType(original[key]) === update[key].type;
 }
 
-function updateRelationships(update, model, originalRecord) {
+function findOrCreate(state, relationship) {
+  return state[relationship.type][relationship.id]
+}
+
+function updateInverse(state, update, record, relationshipName, model) {
+  if (model[relationshipName].inverse) {
+    var inverseRecord = findOrCreate(state, update[relationshipName])
+    var updatedInverse = merge({}, inverseRecord, {
+      changedRelationships: {
+        [model[relationshipName].inverse]: {
+          data: [{
+            id: record.id,
+            type: record.type,
+          }]
+        }
+      }
+    })
+    //console.log(updatedInverse)
+    state[updatedInverse.type][updatedInverse.id] = updatedInverse
+    //console.log(inverseRecord)
+  }
+  
+  // if there is an inverse
+  // findOrCreate the inverse record
+  // check the inverse type
+  // if the inverse is a belongsTo
+  // set the inverse record
+  // if the inverse record had a different record, unset the different record
+
+  // if the inverse is a hasMany add the record
+  // madComplexity
+}
+
+function updateRelationships(update, model, originalRecord, state) {
   return relationshipKeys(model, update).reduce(function(recordState, key) {
     if (relationshipIsSame(recordState.changedRelationships, update, key)) {
       return recordState;
@@ -65,6 +97,8 @@ function updateRelationships(update, model, originalRecord) {
       }
       return recordState;
     }
+    updateInverse(state, update, originalRecord, key, model)
+
     var changedRelationships = Object.assign(
       {}, recordState.changedRelationships,
       {
@@ -107,7 +141,11 @@ function updateRecord(state, record, update, getModel) {
     });
   }, originalRecord)
 
-  return updateRelationships(update, getModel(originalRecord.type), updatedAttributes);
+  return merge({}, state, {
+    [record.type]: {
+      [record.id]: updateRelationships(update, getModel(originalRecord.type), updatedAttributes, state)
+    }
+  });
 }
 
 
@@ -124,11 +162,7 @@ export default (models) => {
           {}, state, normalizeDocument(action.jsonDocument)
         );
       case 'UPDATE':
-        return merge({}, state, {
-          [action.record.type]: {
-            [action.record.id]: updateRecord(state, action.record, action.update, getModel)
-          }
-        });
+        return updateRecord(state, action.record, action.update, getModel)
       default:
         return state
     }

@@ -21,3 +21,7 @@ implement accessors
 
 implement createRecord
 
+reorder params in reducer/records
+
+make getRecord use the models information isntead of returning
+undefined for unknown relationships.
