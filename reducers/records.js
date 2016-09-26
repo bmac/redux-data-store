@@ -57,9 +57,29 @@ function findOrCreate(state, relationship) {
   return state[relationship.type][relationship.id]
 }
 
+function updateRecordInfo(state, record) {
+  return merge({}, state, {
+    [record.type]: {
+      [record.id]: record
+    }
+  });
+}
+
 function updateInverse(state, update, record, relationshipName, model) {
   if (model[relationshipName].inverse) {
     var inverseRecord = findOrCreate(state, update[relationshipName])
+    var data;
+    if (model[relationshipName].relationshipType === 'belongs-to') {
+      data = [{
+        id: record.id,
+        type: record.type,
+      }] 
+    } else {
+      data = {
+        id: record.id,
+        type: record.type,
+      }
+    }
     var updatedInverse = merge({}, inverseRecord, {
       changedRelationships: {
         [model[relationshipName].inverse]: {
@@ -70,9 +90,7 @@ function updateInverse(state, update, record, relationshipName, model) {
         }
       }
     })
-    //console.log(updatedInverse)
-    state[updatedInverse.type][updatedInverse.id] = updatedInverse
-    //console.log(inverseRecord)
+    return updateRecordInfo(state, updatedInverse);
   }
   
   // if there is an inverse
@@ -87,7 +105,8 @@ function updateInverse(state, update, record, relationshipName, model) {
 }
 
 function updateRelationships(update, model, originalRecord, state) {
-  return relationshipKeys(model, update).reduce(function(recordState, key) {
+  return relationshipKeys(model, update).reduce(function(state, key) {
+    var recordState = findOrCreate(state, originalRecord);
     if (relationshipIsSame(recordState.changedRelationships, update, key)) {
       return recordState;
     }
@@ -97,7 +116,7 @@ function updateRelationships(update, model, originalRecord, state) {
       }
       return recordState;
     }
-    updateInverse(state, update, originalRecord, key, model)
+    state = updateInverse(state, update, originalRecord, key, model)
 
     var changedRelationships = Object.assign(
       {}, recordState.changedRelationships,
@@ -109,10 +128,14 @@ function updateRelationships(update, model, originalRecord, state) {
           }
         }
       })
-    return Object.assign({}, recordState, {
+
+    var updatedRecordInfo = Object.assign({}, recordState, {
       changedRelationships: changedRelationships
     });
-  }, originalRecord)
+
+    return updateRecordInfo(state, updatedRecordInfo);
+                            
+  }, state)
 }
 
 function updateRecord(state, record, update, getModel) {
@@ -140,12 +163,9 @@ function updateRecord(state, record, update, getModel) {
       changedAttributes: changedAttributes
     });
   }, originalRecord)
+  state = updateRecordInfo(state, updatedAttributes);
 
-  return merge({}, state, {
-    [record.type]: {
-      [record.id]: updateRelationships(update, getModel(originalRecord.type), updatedAttributes, state)
-    }
-  });
+  return updateRelationships(update, getModel(originalRecord.type), updatedAttributes, state);
 }
 
 
