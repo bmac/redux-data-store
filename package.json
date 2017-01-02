@@ -6,7 +6,11 @@
   "scripts": {
     "test": "mocha --colors --compilers js:babel-core/register tests/**/*-test.js"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bmac/redux-data-store.git"
+  },
+  "author": "bmac",
   "license": "MIT",
   "dependencies": {
     "lodash.merge": "^4.6.0"
